@@ -1,10 +1,9 @@
-// dah fix banget brooo + batalin soal + pembahasan
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FLUIDOKU</title>
+  <title>FLUIDOKU DINAMIS</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -334,7 +333,7 @@
   </div>
   
   <script>
-    const MODERATOR_PASSWORD = "fluidoku"; 
+    const MODERATOR_PASSWORD = "dinamis"; 
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT29zgkvLSp5tlnJYtz4chbnNzNCg6wvqHIG_nCdOeDynVgmbG3tAsTB4eEDuUgJJ11RN1WK3zYo_1I/pub?gid=0&single=true&output=csv";
     const firebaseConfig = {
       apiKey: "AIzaSyCiNPtBCXl18-fSV0hiHLiXQ1x3_zstGvo",
@@ -369,8 +368,8 @@
     let physicsWrongCount = 0;
     let physicsCorrectCount = 0;
     let maxComboEver = 0;
-    const soundCorrect = new Audio('https://github.com/nobiiiit/kit-sudoku/raw/refs/heads/main/freesound_community-funny-yay-6273.mp3'); 
-    const soundWrong = new Audio('https://github.com/nobiiiit/kit-sudoku/raw/refs/heads/main/freesound_community-buzzer2-6109.mp3');
+    const soundCorrect = new Audio('https://github.com/funphysics01/Fluidoku-Dinamis/raw/refs/heads/main/sound/freesound_community-funny-yay-6273.mp3'); 
+    const soundWrong = new Audio('https://github.com/funphysics01/Fluidoku-Dinamis/raw/refs/heads/main/sound/freesound_community-buzzer2-6109.mp3');
 
     function handleJoin() {
       const name = document.getElementById("playerName").value.trim();
