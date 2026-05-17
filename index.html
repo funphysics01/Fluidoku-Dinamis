@@ -6,17 +6,19 @@
   <title>FLUIDOKU DINAMIS</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-<style>
+  <style>
     :root {
       --bg-color: #243b55;         
       --panel-bg: rgba(43, 67, 109, 0.8); 
-      --neon-cyan: #80D1F3;      
-      --neon-orange: #FF9531;    
-      --neon-red: #F696A6;       
-      --neon-green: #00AB52;     
-      --neon-blue: #4A90E2; 
-      --neon-yellow: #FFD700;
-      --text-light: #f0f4f8;
+      
+      /* WARNA BARU: Lebih Terang, Neon, dan Menyala */
+      --neon-cyan: #00F3FF;      
+      --neon-orange: #FFAC1C;    
+      --neon-red: #FF3131;       
+      --neon-green: #00FF66;     
+      --neon-blue: #38B6FF;      
+      --neon-yellow: #FFF000;    
+      --text-light: #FFFFFF;     
     }
   
     body {
@@ -46,6 +48,12 @@
       border-radius: 12px;
       padding: 15px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Pengetatan ketebalan teks judul panel */
+    .panel h4 {
+      font-weight: 800 !important;
+      text-shadow: 0 0 8px currentColor;
     }
 
     .sudoku-grid { 
@@ -86,7 +94,7 @@
 
     .cell.highlight-axis { background: #3d5685 !important; }
     .cell.highlight-match { 
-      background: rgba(128, 209, 243, 0.4) !important; 
+      background: rgba(0, 243, 255, 0.4) !important; 
       box-shadow: inset 0 0 10px var(--neon-cyan); 
     }
 
@@ -207,6 +215,21 @@
     }
     .cell.answered-by-you { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
     .cell.answered-by-other { color: var(--neon-orange); background: rgba(255, 149, 49, 0.1); }
+    
+    /* Aturan skor cetak tebal */
+    .scoring-rules {
+      font-weight: 600;
+    }
+
+    /* Gaya tambahan tombol pilihan role */
+    .role-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .role-selector .btn {
+      margin-top: 0;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -216,14 +239,24 @@
 <body>
   <div class="header">FLUIDOKU</div>
   <div id="notifArea"></div>
+  
   <div id="authArea" class="panel" style="max-width: 400px; margin: 20px auto; text-align: center;">
-    <h3 style="color: var(--neon-yellow)">MASUK PERMAINAN</h3>
+    <h3 style="color: var(--neon-yellow); margin-bottom: 15px;">MASUK PERMAINAN</h3>
+    
+    <!-- Pilihan Mode / Role -->
+    <div class="role-selector">
+      <button id="btnRolePemain" class="btn btn-primary" onclick="selectRole('pemain')">PEMAIN</button>
+      <button id="btnRoleMod" class="btn btn-outline-cyan" onclick="selectRole('moderator')">MODERATOR</button>
+    </div>
+
     <input type="text" id="playerName" placeholder="Nama Anda" style="margin-bottom:10px; 
       padding:12px; width:100%; box-sizing:border-box; background:#000; 
       border:1px solid var(--neon-blue); color:#fff; border-radius:6px;">
-    <input type="password" id="modPass" placeholder="Password Moderator (Opsional)" 
+      
+    <input type="password" id="modPass" placeholder="Password Moderator" 
       style="margin-bottom:15px; padding:12px; width:100%; box-sizing:border-box; 
-      background:#000; border:1px solid var(--neon-blue); color:#fff; border-radius:6px;">
+      background:#000; border:1px solid var(--neon-blue); color:#fff; border-radius:6px; display: none;">
+      
     <button class="btn btn-primary" onclick="handleJoin()">MASUK PERMAINAN</button>
   </div>
 
@@ -239,17 +272,17 @@
     </div>
   </div>
 
-<div id="mainGameArea" class="game-container">
+  <div id="mainGameArea" class="game-container">
     <div class="main-content-wrapper" style="display: flex; flex-direction: column; gap: 15px;">
       <div id="sidePanel" class="side-stats" style="display: flex; gap: 10px;">
         <div class="panel" style="flex: 1; text-align: center;">
-          <div style="color:var(--neon-green); font-size: 12px;">SKOR</div>
-          <div id="score" style="font-size: 24px; font-weight: bold;">0</div>
+          <div style="color:var(--neon-green); font-size: 12px; font-weight: bold;">SKOR</div>
+          <div id="score" style="font-size: 28px; font-weight: 800; text-shadow: 0 0 10px rgba(255,255,255,0.3);">0</div>
           <div id="comboText" style="display: none; font-size: 10px; color: var(--neon-orange);">KOMBO X<span id="comboVal">0</span></div>
         </div>
         <div class="panel" style="flex: 1; text-align: center;">
-          <div style="color:var(--neon-cyan); font-size: 12px;">WAKTU</div>
-          <div id="playerTimer" style="font-size: 24px; font-weight: bold;">00:00</div>
+          <div style="color:var(--neon-cyan); font-size: 12px; font-weight: bold;">WAKTU</div>
+          <div id="playerTimer" style="font-size: 28px; font-weight: 800; text-shadow: 0 0 10px rgba(255,255,255,0.3);">00:00</div>
         </div>
       </div>
 
@@ -349,6 +382,7 @@
     const database = firebase.database();
 
     let isModerator = false;
+    let selectedRoleMode = "pemain"; // Default pilihan awal role
     let currentPlayer = "";
     let score = 0;
     let comboCount = 0;
@@ -371,12 +405,40 @@
     const soundCorrect = new Audio('https://github.com/funphysics01/Fluidoku-Dinamis/raw/refs/heads/main/sound/freesound_community-funny-yay-6273.mp3'); 
     const soundWrong = new Audio('https://github.com/funphysics01/Fluidoku-Dinamis/raw/refs/heads/main/sound/freesound_community-buzzer2-6109.mp3');
 
+    // Fungsi Pengendali Pilihan Role UI
+    function selectRole(role) {
+      selectedRoleMode = role;
+      const btnPemain = document.getElementById("btnRolePemain");
+      const btnMod = document.getElementById("btnRoleMod");
+      const passField = document.getElementById("modPass");
+
+      if (role === 'pemain') {
+        btnPemain.className = "btn btn-primary";
+        btnMod.className = "btn btn-outline-cyan";
+        passField.style.display = "none";
+      } else {
+        btnPemain.className = "btn btn-outline-cyan";
+        btnMod.className = "btn btn-primary";
+        passField.style.display = "block";
+      }
+    }
+
     function handleJoin() {
       const name = document.getElementById("playerName").value.trim();
       const pass = document.getElementById("modPass").value.trim();
       if (!name) return alert("Isi nama dulu!");
+      
+      // Validasi password khusus jika memilih mode Moderator
+      if (selectedRoleMode === "moderator") {
+        if (pass !== MODERATOR_PASSWORD) {
+          return alert("Password Moderator Salah!");
+        }
+        isModerator = true;
+      } else {
+        isModerator = false;
+      }
+
       currentPlayer = name;
-      isModerator = (pass === MODERATOR_PASSWORD);
       playerAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${name}`;
 
       if (isModerator) {
@@ -699,6 +761,7 @@
       }
     }
 
+    // Rekap unduhan CSV otomatis
     function downloadCSV() {
       database.ref('leaderboard').once('value', snap => {
         let csv = "Nama,Skor,Soal\n";
